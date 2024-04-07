@@ -1,0 +1,204 @@
+mov ah, 02h
+mov dl, 0ah
+int 21h
+mov dl, 0dh
+int 21h
+mov ah, 0
+
+mov ah, 02h
+mov dl, 0ah
+int 21h
+mov dl, 0dh
+int 21h
+mov ah, 0
+
+mov ah, 02h
+mov dl, 0ah
+int 21h
+mov dl, 0dh
+int 21h
+mov ah, 0
+
+{val=[ id: val, type: int, value: ? ]
+, b2=[ id: b2, type: int, value: 20 ]
+, res=[ id: res, type: int, value: ? ]
+, b3=[ id: b3, type: int, value: 2 ]
+, msg1=[ id: msg1, type: word, value: ,Este es un mensajeee, ]
+, var=[ id: var, type: int, value: 10 ]
+, i=[ id: i, type: int, value: 0 ]
+, msglabel_msg1=[ id: msglabel_msg1, type: word, value: ,Calculo de operaciones, ]
+, msglabel_msg2=[ id: msglabel_msg2, type: word, value: ,Dentro de ciclo, ]
+, var2=[ id: var2, type: int, value: 8 ]
+, msglabel_msg0=[ id: msglabel_msg0, type: word, value: ,este es otro mensaje, ]
+, b1=[ id: b1, type: int, value: 50 ]
+}
+******* PRIMER BARRIDO TERMINADO ******* 
+
+
+
+.model small
+.stack 100h
+jmp start
+ .data
+val dw ?
+b2 dw 20
+res dw ?
+b3 dw 2
+msg1 dw ",Este es un mensajeee, $"
+var dw 10
+i dw 0
+msglabel_msg1 dw ",Calculo de operaciones, $"
+msglabel_msg2 dw ",Dentro de ciclo, $"
+var2 dw 8
+msglabel_msg0 dw ",este es otro mensaje, $"
+b1 dw 50
+
+start:
+.code
+
+mov ax, @data
+mov ds, ax
+mov ah, 09h
+mov dx, offset msg1
+int 21h
+mov ah, 02h
+mov dl, 0ah
+int 21h
+mov dl, 0dh
+int 21h
+mov ah, 0
+
+mov ax, @data
+mov ds, ax
+mov ah, 09h
+mov dx, offset msglabel_msg0
+int 21h
+mov ah, 02h
+mov dl, 0ah
+int 21h
+mov dl, 0dh
+int 21h
+mov ah, 0
+
+mov ax, var
+sub ax, var2
+mov res, ax
+mov ax, res
+call print
+mov ah, 02h
+mov dl, 0ah
+int 21h
+mov dl, 0dh
+int 21h
+mov ah, 0
+
+mov ax, @data
+mov ds, ax
+mov ah, 09h
+mov dx, offset msglabel_msg1
+int 21h
+mov ah, 02h
+mov dl, 0ah
+int 21h
+mov dl, 0dh
+int 21h
+mov ah, 0
+
+mov ax, b1
+mov dx, 0
+idiv var
+mov val, ax
+mov ax, val
+call print
+mov ah, 02h
+mov dl, 0ah
+int 21h
+mov dl, 0dh
+int 21h
+mov ah, 0
+
+mov ax, b2
+mov dx, 0
+idiv b3
+mov val, dx
+mov ax, val
+call print
+mov ah, 02h
+mov dl, 0ah
+int 21h
+mov dl, 0dh
+int 21h
+mov ah, 0
+
+mov ax, var
+imul var2
+mov res, ax
+mov ax, res
+call print
+mov ah, 02h
+mov dl, 0ah
+int 21h
+mov dl, 0dh
+int 21h
+mov ah, 0
+
+label0:
+
+mov ax, i
+sub ax, 1
+mov i, ax
+mov ax, @data
+mov ds, ax
+mov ah, 09h
+mov dx, offset msglabel_msg2
+int 21h
+mov ah, 02h
+mov dl, 0ah
+int 21h
+mov dl, 0dh
+int 21h
+mov ah, 0
+
+cmp i, 50
+jl label0
+mov i, 0
+
+
+ret
+
+print proc
+cmp ax, 0
+jne print_ax_r
+push ax
+mov al, '0'
+mov ah, 0eh
+int 10h
+pop ax
+ret 
+print_ax_r:
+pusha
+mov dx, 0
+cmp ax, 0
+je pn_done
+mov bx,10
+div bx
+call print_ax_r
+mov ax, dx
+add al, 30h
+mov ah, 0eh
+int 10h
+jmp pn_done
+pn_done:
+popa
+ret
+endp
+
+******* SEGUNDO BARRIDO TERMINADO ******* 
+
+
+
+
+
+
+
+Análisis exitoso

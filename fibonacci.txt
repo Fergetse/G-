@@ -1,0 +1,24 @@
+start
+comment
+Este programa generará la típica cuenta para mostrar
+la susesión fibinacci
+fin
+
+int a set 0.
+int b set 1.
+int c.
+
+repeat int i set 0 to 10..
+ if i eq 0..
+  show.a.
+  show.b.
+ ..
+ c set a add b.
+ show.c.
+ a set b.
+ b set c.
+ i set i add 1.
+..
+
+end .. printDec
+

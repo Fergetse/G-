@@ -1,0 +1,32 @@
+start
+
+comment
+Comentario de varias lineas.
+Este programa mostrará la suma de varias variables.
+fin
+
+int var set 10.
+int var2 set 20.
+int var3 set 30.
+int res.
+
+res set 10 add var3.
+res set res add var3.
+res set res add var2.
+res set res add var.
+
+show.res.
+
+repeat int i set 0 to 100..
+ i set i add 10.
+ repeat int j set 0 to 2..
+  j set j add 1.
+  show.2.
+ ..
+ show.i.
+ if i eq 50..
+  show.256.
+ ..
+..
+
+end .. printDec

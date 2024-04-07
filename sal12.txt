@@ -1,0 +1,43 @@
+jmp start
+var dw 10
+var2 dw 20
+var3 dw 30
+res dw 0
+start:
+
+mov ax, 10
+add ax, var3
+mov res, ax
+mov ax, res
+add ax, var3
+mov res, ax
+mov ax, res
+add ax, var2
+mov res, ax
+mov ax, res
+add ax, var
+mov res, ax
+call print_ax_binary
+ret
+
+print_ax_binary proc
+pusha
+mov bx, ax
+mov cx, 8
+print_bit:
+mov ah, 02h
+mov dl, '0'
+test bx, 10000000b
+jz zero
+mov dl, '1'
+zero:; funcion zero
+int 21h
+shl bx, 1
+loop print_bit
+mov ah, 02h
+mov dl, 'b'
+int 21h
+popa
+ret
+endp
+

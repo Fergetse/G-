@@ -1,0 +1,10 @@
+start
+int var set 10.
+int res.
+word palabra set ,hola variable,.
+
+res set var add 25.
+show.res.
+showW.,Hola como estas,.
+showW.palabra.
+end..printDec

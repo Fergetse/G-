@@ -1,0 +1,13 @@
+start
+int res.
+
+repeat int i set 0 to 100..
+ res set i mod 2.
+ if res eq 0..
+  showW.,Par:,.
+  show.i.
+ ..
+ i set i add 1.
+..
+
+end..printDec

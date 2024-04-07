@@ -1,0 +1,62 @@
+{a=[ id: a, type: int, value: 100 ]
+, res=[ id: res, type: int, value: a add b ]
+, b=[ id: b, type: int, value: 10.5 ]
+}
+******* PRIMER BARRIDO TERMINADO ******* 
+
+
+
+jmp start
+a dw 100
+res dw a add b
+b dw 10.5
+
+start:
+mov ax, res
+call print
+mov ah, 02h
+mov dl, 0ah
+int 21h
+mov dl, 0dh
+int 21h
+mov ah, 0
+
+
+ret
+
+print proc
+cmp ax, 0
+jne print_ax_r
+push ax
+mov al, '0'
+mov ah, 0eh
+int 10h
+pop ax
+ret 
+print_ax_r:
+pusha
+mov dx, 0
+cmp ax, 0
+je pn_done
+mov bx,10
+div bx
+call print_ax_r
+mov ax, dx
+add al, 30h
+mov ah, 0eh
+int 10h
+jmp pn_done
+pn_done:
+popa
+ret
+endp
+
+******* SEGUNDO BARRIDO TERMINADO ******* 
+
+
+
+
+
+
+
+Análisis exitoso

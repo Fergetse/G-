@@ -1,0 +1,28 @@
+start
+
+comment 
+este es
+hola como estas
+jijiji
+comentario largo 
+fin
+
+int var set 10.
+int num set 50.
+decimal res set var add num.
+
+int control set 0.
+
+repeat if res ge 0..
+ if res mod 2 eq 0..
+  control set control add 1.
+ ..
+
+ repeat int i set 1 to 50..
+  i set i add 10.
+  show.i.
+ ..
+..
+
+
+end

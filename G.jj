@@ -1,0 +1,895 @@
+PARSER_BEGIN(G)
+
+import java.util.HashMap;
+import java.util.ArrayList;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.Scanner;
+
+public class G {
+    public static int cont = 0, cont1 = 0, tempC = 0;
+    public static HashMap<String, Data> table = new HashMap<String, Data>();
+
+  public static void main(String[] args) {
+    try {
+      String input = obtenerEntradaDesdeConsola();
+      InputStream newInputStream = new ByteArrayInputStream(input.getBytes(StandardCharsets.UTF_8));
+      G parser = new G(newInputStream);
+
+      //primer barrido
+      parser.start(true);
+      System.out.println(table);
+      System.out.println("******* PRIMER BARRIDO TERMINADO ******* \n\n\n");
+  
+      // Reinicia el analizador léxico para el segundo barrido
+      // Llamada a un método para obtener la entrada desde la consola
+      newInputStream = new ByteArrayInputStream(input.getBytes(StandardCharsets.UTF_8));
+      parser.ReInit(newInputStream);
+  
+      // Segundo barrido
+
+            //Generación de código
+            printCode(createVars());
+            cont1 = 0;
+            tempC = 0;
+            //printCode(createStatements());
+            //printCode(createPrintable());
+
+      parser.start(false);
+
+
+      System.out.println("******* SEGUNDO BARRIDO TERMINADO ******* \n\n\n");
+  
+      System.out.println("\n\n\n\nAnálisis exitoso");
+      
+    } catch (ParseException e) {
+      e.printStackTrace();
+    }
+  }
+
+  //todo Métodos de tabla de valores////////
+
+  public static boolean exist(String id){
+    if(table.containsKey(id))
+        return true;
+    return false;
+}
+
+  public static void insertId(String id, String type, String value){
+    if(exist(id)){
+      System.out.println("Error: Variable repetida "+id);
+      return;
+    }
+    table.put(id, new Data(id, type, value));
+  }
+
+  public static Data getId(String id){
+    if(!exist(id)){
+      return null;
+    }
+    return table.get(id);
+  }
+
+  //todo /////////////////////////////////////
+
+  ////////////////////////////////
+
+  public static String obtenerEntradaDesdeConsola() {
+    StringBuilder sb = new StringBuilder();
+    Scanner scanner = new Scanner(System.in);
+    while (scanner.hasNextLine()) {
+        sb.append(scanner.nextLine());
+        sb.append(System.lineSeparator());
+    }
+    return sb.toString();
+  }
+
+  ////////////////////////////////
+  public static String getnmonic(String id){
+    String nm = "";
+    switch (id) {
+        case "be":
+            nm = "jl";
+            break;
+        case "beq":
+            nm = "jle";
+            break;
+        case "geq":
+            nm = "jge";
+            break;
+        case "eq":
+            nm = "je";
+            break;
+        case "ge":
+            nm = "jg";
+            break;
+        case "neq":
+            nm = "jne";
+            break;
+            //Contrarios
+        case "!be":
+            nm = "jge";
+            break;
+        case "!beq":
+            nm = "jg";
+            break;
+        case "!geq":
+            nm = "jl";
+            break;
+        case "!eq":
+            nm = "jne";
+            break;
+        case "!ge":
+            nm = "jle";
+            break;
+        case "!neq":
+            nm = "je";
+            break;
+        default:
+            nm = "def";
+            break;
+    }
+    return nm;
+}
+
+///todo Méotodos para la generación de código
+
+public static String printValue(String id){
+  String ret = setValues("ax", id)+"\n";
+  ret += ("call print\n");
+  ret += printSpace();
+  return ret;
+}
+
+public static String printWord(String word, boolean var){
+  String id = word;
+  String ret = "";
+
+  if(!var){
+    id = generateMSG();
+    if(!exist(id))
+      insertId(id,"word", word);
+    else{
+      ret += ("mov ax, @data\n"+
+      "mov ds, ax\n"+
+      "mov ah, 09h\n"+
+      "mov dx, offset "+id+"\n"+
+      "int 21h\n");
+      ret += printSpace();
+      return ret;
+    }
+  }else{
+    ret += ("mov ax, @data\n"+
+    "mov ds, ax\n"+
+    "mov ah, 09h\n"+
+    "mov dx, offset "+id+"\n"+
+    "int 21h\n");
+    ret += printSpace();
+    return ret;
+  }
+  ret += printSpace();
+  return ret;
+}
+
+public static String printSpace(){
+  String ret = ("mov ah, 02h\n"+
+          "mov dl, 0ah\n"+
+          "int 21h\n"+
+          "mov dl, 0dh\n"+
+          "int 21h\n"+
+          "mov ah, 0\n");
+  return ret;
+}
+
+public static String createVars(){
+  Data value = null;
+  String ret = "";
+  for (String key: table.keySet()) {
+    value = table.get(key);
+    if(value.type.equals("word")){
+      ret += value.id + " dw " + "\"" + value.value + " $\"\n";
+    }else{ 
+      ret += value.id + " dw " + value.value + "\n";
+    }
+  } //another option .model small
+  return (".model tiny\n"+
+          ".stack 100h\n"+
+          "jmp start\n .data\n"+ret+"\nstart:\n.code\n");
+}
+
+public static String createTempVar(){
+  return ("temp" + (tempC++));
+}
+
+//todo // generación de estructuras//////////////////////////////////// (1)
+public static String generateLoop(String label, String id, String limit, String condition){
+  String nm = getnmonic(condition);
+  String ret = ("cmp "+id+", "+limit+"\n");
+  ret += (nm+" "+label+"\n");
+  ret += setValues(id, "0")+"\n";
+  return ret;
+}
+
+public static String generateIf(String id, String[] info, String label){
+  //String v1 = opVar();
+
+
+  String nm = getnmonic("!"+info[0]);
+  String ret = ("cmp "+id+", "+info[1]+"\n");
+  ret += (nm + " " + label);
+  return ret;
+}
+
+public static String generateOp(String values){
+  String res = "";
+  return res;
+}
+//todo //////////////////////////////////////////////////////////////// (1)
+
+
+  public static void printCode(String code){
+    System.out.println(code);
+  }
+
+  public static String[] getValues(String complete){
+    String[] values = {"", ""};
+    for(int i = 0; complete.charAt(i) != ' '; i++){
+        values[0] += complete.charAt(i)+"";
+    }
+    for(int i = complete.length()-1; complete.charAt(i) != ' '; i--){
+        values[1] += complete.charAt(i)+"";
+    }
+
+    StringBuilder val = new StringBuilder(values[1]);
+    values[1] = String.valueOf(val.reverse());
+    return values;
+  }
+
+  public static String createVar(String name, String type, String value){
+    /*if(value.contains("add")){
+        return makeAdd(value, name);
+    }*/
+    return (name + " " + type + " " + value);
+  }
+
+  public static String opVar(String name, String value){
+    if(value.contains("add")){
+        return makeAdd(value, name);
+    }else if(value.contains("sub")){
+      return makeSub(value, name);
+    }else if(value.contains("mul")){
+      return makeMul(value, name);
+    }else if(value.contains("div")){
+      return makeDiv(value, name);
+    }else if(value.contains("mod")){
+      return makeMod(value, name);
+    }
+
+    return setValuesVar(name, value);
+  }
+
+  public static String generateLabel(){
+    return ("label" + (cont++));
+  }
+
+  public static String generateMSG(){
+    return ("msglabel_msg" + (cont1++));
+  }
+
+  public static String makeAdd(String v, String var) {
+    String values[] = getValues(v);
+    String ret = "", v1 = values[0], v2 = values[1];
+
+    //String temp = generateTemp();
+    String temp = "ax";
+    //ret += createVar(temp, "dw", "0")+"\n";
+    //ret += createVar(var, "dw", "0")+"\n";
+
+    String val = setValues(temp, v1);
+    ret += val + "\n";
+    ret += "add " + temp + ", " + v2;
+    ret += "\n"+setValues(var, temp);
+    return ret;
+  }
+
+  public static String makeMul(String v, String var){
+    String values[] = getValues(v);
+    String ret = "", v1 = values[0], v2 = values[1];
+
+    String temp = "ax";
+
+    String val = setValues(temp, v1);
+    ret += val + "\n";
+    ret += "imul " + v2;
+    ret += "\n"+setValues(var, temp);
+
+    return ret;
+  }
+
+  public static String makeDiv(String v, String var){
+    String values[] = getValues(v);
+    String ret = "", v1 = values[0], v2 = values[1];
+    String temp = "ax";
+
+    String val = setValues(temp, v1);
+    ret += val + "\n";
+    val = setValues("dx", "0");
+    ret += val + "\n";
+    ret += "idiv " + v2 + "\n";
+    ret += setValues(var, temp);
+    return ret;
+  }
+
+  public static String makeMod(String v, String var){
+    String values[] = getValues(v);
+    String ret = "", v1 = values[0], v2 = values[1];
+    String temp = "ax";
+
+    String val = setValues(temp, v1);
+    ret += val + "\n";
+    val = setValues("dx", "0");
+    ret += val + "\n";
+    ret += "idiv " + v2 + "\n";
+    ret += setValues(var, "dx");
+    return ret;
+  }
+
+  public static String makeSub(String v, String var) {
+    String values[] = getValues(v);
+    String ret = "", v1 = values[0], v2 = values[1];
+
+    String temp = "ax";
+
+    String val = setValues(temp, v1);
+    ret += val + "\n";
+    ret += "sub " + temp + ", " + v2;
+    ret += "\n"+setValues(var, temp);
+    return ret;
+  }
+
+  public static String setValues(String v1, String v2){
+    return ("mov " + v1 + ", " + v2);
+  }
+
+  public static String setValuesVar(String v1, String v2){
+    String ret = "";
+    String val = setValues("ax", v2);
+    ret += val + "\n";
+    ret += "add " + "ax" + ", " + 0;
+    ret += "\n"+setValues(v1, "ax");
+    return ret;
+  }
+
+    public static String printValueBin(){
+        return ("print proc\n"+
+                "pusha\n"+
+                "mov bx, ax\n"+
+                "mov cx, 8\n"+
+
+                "print_bit:\n"+
+                    "mov ah, 02h\n"+
+                    "mov dl, '0'\n"+
+                    "test bx, 10000000b\n"+
+                    "jz zero\n"+
+                    "mov dl, '1'\n"+
+
+                "zero:\n"+
+                    "int 21h\n"+
+                    "shl bx, 1\n"+
+                    "loop print_bit\n"+
+                "mov ah, 02h\n"+
+                "mov dl, 'b'\n"+
+                "int 21h\n"+
+                "popa\n"+
+                "ret\n"+
+            "endp\n"
+        );
+    }
+
+    public static String printValueDecim(){
+        return (
+            "print proc\n"+
+            "cmp ax, 0\n"+
+            "jne print_ax_r\n"+
+                "push ax\n"+
+                "mov al, '0'\n"+
+                "mov ah, 0eh\n"+
+                "int 10h\n"+
+                "pop ax\n"+
+                "ret \n"+
+           "print_ax_r:\n"+
+                "pusha\n"+
+                "mov dx, 0\n"+
+                "cmp ax, 0\n"+
+                "je pn_done\n"+
+                "mov bx,10\n"+
+                "div bx\n"+
+                "call print_ax_r\n"+
+                "mov ax, dx\n"+
+                "add al, 30h\n"+
+                "mov ah, 0eh\n"+
+                "int 10h\n"+
+                "jmp pn_done\n"+
+            "pn_done:\n"+
+                "popa\n"+
+                "ret\n"+
+            "endp\n"
+        );
+    }
+}
+
+//! Clase para los ID declaradas///////
+class Data{
+  String id;
+  String type; //int, decimal, byte ...
+  String value;
+
+  Data(String id, String type, String value){
+    this.id = id;
+    this.type = type;
+    if(value.equals(""))
+      this.value = "?";
+    else
+      this.value = value;
+  }
+
+  @Override
+  public String toString(){
+    return ("[ id: "+id + ", type: "+type + ", value: " + value +" ]\n");
+  }
+}
+//! //////////////////////////////////
+
+//? CLase para el manejo de operaciones ////////////////////////////////
+
+/*class Operation{
+  String var1, operator;
+  Operation var2;
+
+  Operation(String var1, String operator, Operation var2){
+    this.operator = operator;
+    this.var1 = var1;
+    this.var2 = var2;
+  }
+
+  Operation(String var1){
+    this.operator = null;
+    this.var1 = var1;
+    this.var2 = null;
+  }
+  
+}*/
+
+ //? ///////////////////////////////////////////////////////////////////
+
+
+PARSER_END(G)
+  //! Comentarios largos
+  SKIP :
+  {
+      <"comment">{
+      }:DentroComentario
+  }
+  
+  <DentroComentario> SKIP:
+  {
+      <"fin"> : DEFAULT
+  }
+  
+  <DentroComentario> MORE:
+  {
+      <~[]>
+  }
+
+  // Tokens
+  TOKEN:{
+     <ARRAY_START : "astart" >
+    | <ARRAY_END : "aend" >
+    | <START: "start">
+    | <END: "end">
+    | <SET: "set">
+    | <IF: "if">
+    | <REPEAT: "repeat">
+    | <DOT: ".">
+    | <COMMA: ",">
+    | <TO: "to">
+    | <BIN: "printBin">
+    | <DEC: "printDec">
+    | <AND: "and">
+    | <OR: "or">
+    | <SHOW: "show"> {
+
+    }
+    | <SHOWW: "showW">
+  }
+  TOKEN : { <INT : "int" > }
+  TOKEN : { <WORD : "word" > }
+  TOKEN : { <BYTE : "byte" > }
+  TOKEN : { <DECIMAL : "decimal" > }
+  TOKEN : { <ARRAY : "array" > }
+
+  TOKEN : { <ADD : "add" > }
+  TOKEN : { <SUB : "sub" > }
+  TOKEN : { <MUL : "mul" > }
+  TOKEN : { <DIV : "div" > }
+  TOKEN : { <MOD : "mod" > }
+
+  TOKEN : { <EQ : "eq" > }
+  TOKEN : { <NEQ : "neq" > }
+  TOKEN : { <BEQ : "beq" > }
+  TOKEN : { <GEQ : "geq" > }
+  TOKEN : { <BE : "be" > }
+  TOKEN : { <GE : "ge" > }
+
+  TOKEN: {
+    <IDENTIFIER: (["a"-"z", "A"-"Z"])([ "a"-"z", "A"-"Z", "0"-"9", "_" ])* >
+    |
+    < INTEGER: (["0"-"9"])+ >
+    |
+    < STRING: (<COMMA>(~[","])+<COMMA> ) >
+    |
+    < CHAR: "'" (~["'"])* "'" >
+    |
+    < FLOAT: (["0"-"9"])+ "." (["0"-"9"])+ >
+  }
+
+ ////////////////////////////////
+
+ SKIP : { " " | "\t" | "\r" | "\n" }
+
+SPECIAL_TOKEN:
+{
+<~[]>
+}
+
+//SPECIAL_TOKEN : { < COMMENT: "comment" (~[""])* "end" > }
+
+
+  void start(boolean inicial) throws ParseException :
+  {}
+  {
+    Program(inicial)
+    <EOF>
+  }
+
+  void Program(boolean inicial) :
+  {}
+  {
+    <START>{
+      //if(!inicial)
+        //System.out.println("jmp start");
+    }
+    Declarations(inicial){
+      //if(!inicial)
+       // System.out.println("start:\n");
+    }
+    Statements(inicial)
+    (<END>(<DOT><DOT>[<DEC>{
+        {
+          if(!inicial){
+            System.out.println("\nret\n");
+            printCode(printValueDecim());
+          }
+        }
+    }|<BIN>{
+        {
+          if(!inicial){
+            System.out.println("\nret\n");
+            printCode(printValueBin());
+          }
+        }
+    }])?)
+  }
+
+  void Declarations(boolean inicial) :
+  {}
+  {
+    (Declaration(inicial))*
+  }
+
+  void Declaration(boolean inicial) :
+  {String name = "", type = "", value = "";}
+  {
+    (type = Type(inicial)
+    name = Variable(inicial)
+    (<SET>
+    value = Expression(inicial, true/* true if its a declaration*/))?
+    <DOT>){
+      if(inicial){
+        insertId(name, type, value);
+        return;
+      }
+        //Data val = getId(name);
+       // printCode(createVar(val.id, val.type, val.value));
+    }
+  }
+
+ String Type(boolean inicial) :
+  {}
+  {
+    (<INT>
+    | <WORD>
+    | <BYTE>
+    | <DECIMAL>
+    | <ARRAY>)
+    {
+        return token.image;
+    }
+  }
+
+  String Variable(boolean inicial) :
+  {}
+  {
+    <IDENTIFIER>{
+        return token.image;
+    }
+  }
+
+  String Expression(boolean inicial, boolean isDeclaration) :
+  {String valor = "", val = "";}
+  {
+    (valor = Term(inicial, isDeclaration)
+    (val = AddOp(inicial){
+        valor += val;
+    } val = Term(inicial, isDeclaration){
+        valor += val;
+    })*){
+        return valor;
+    }
+  }
+
+  String Term(boolean inicial, boolean isDeclaration):
+  {String valor = "", val = "";}
+  {
+    (valor = Factor(inicial, isDeclaration)
+    (val = MulOp(inicial){
+        valor += val;
+    } val = Factor(inicial, isDeclaration){
+        valor += val;
+    })*){
+        return valor;
+    }
+  }
+
+  String Factor(boolean inicial, boolean isDeclaration) :
+  {String valor = "";}
+  {
+    (valor = Variable(inicial)
+    | (valor = Constant(inicial, isDeclaration)){
+
+    }){
+        return valor;
+    }
+  }
+
+  String Constant(boolean inicial, boolean isDeclaration) :
+  {String valor = "", var = "";}
+  {
+    ((valor = Integer(inicial)
+    | valor = Character(inicial)
+    | valor = Float(inicial)){
+      //si es el primer barrido, no es declaración y el valor es constante se crea una variable
+        if(inicial && !isDeclaration)
+          insertId(createTempVar(), "dw", valor);
+        
+        if(!inicial && !isDeclaration){
+          var = createTempVar();
+          if(exist(var)){
+            return var;
+          }
+        }
+        return valor;
+    }
+    | valor = Word(inicial){
+      return valor;
+    })
+    //| Array(inicial)
+  }
+
+  String Integer(boolean inicial) :
+  {String valor = "";}
+  {
+    <INTEGER>{
+        return token.image;
+    }
+  }
+
+  String Word(boolean inicial) :
+  {String valor = "";}
+  {
+    <STRING>{
+        return token.image;
+    }
+  }
+
+  String Character(boolean inicial) :
+  {String valor = "";}
+  {
+    <CHAR>{
+        return token.image;
+    }
+  }
+
+  String Float(boolean inicial) :
+  {String valor = "";}
+  {
+    <FLOAT>{
+        return token.image;
+    }
+  }
+
+  /*void Array(boolean inicial) :
+  {}
+  {
+    <ARRAY_START> (Constant(inicial) ("," Constant(inicial))*)? <ARRAY_END>
+  }*/
+
+  String AddOp(boolean inicial) :
+  {}
+  {
+    (<ADD>
+    | <SUB>){
+        return (" "+token.image+" ");
+    }
+  }
+
+  String MulOp(boolean inicial) :
+  {}
+  {
+    (<MUL>
+    | <DIV>
+    | <MOD>){
+        return (" "+token.image+" ");
+    }
+  }
+
+  void Statements(boolean inicial) :
+  {}
+  {
+    (Statement(inicial))*
+  }
+
+  void Statement(boolean inicial) :
+  {String value = "";}
+  {
+    Assignment(inicial)
+    | Conditional(inicial)
+    | Loop(inicial)
+    | (<SHOW><DOT> 
+      (value = Variable(inicial){
+        if(!inicial){
+          if(!exist(value)){
+            System.out.println("Error, la variable no existe: " + value);
+          }else{
+            printCode(printValue(value));
+          }
+        }
+      }|
+      value = Constant(inicial, false){
+        if(!inicial){
+          printCode(printValue(value));
+        }
+      } )<DOT>{
+      //!Imprimir el valor de una variable o constante
+      //printCode(printValue(value));
+    })| (<SHOWW><DOT> 
+    (value = Variable(inicial){
+      if(!inicial){
+        if(!exist(value)){
+          System.out.println("Error, la variable no existe: " + value);
+        }else{
+          printCode(printWord(value, true));
+        }
+      }
+    }|
+    value = Constant(inicial, false){
+      if(inicial){
+        printCode(printWord(value, false));
+      }else{
+        printCode(printWord(value, false));
+      }
+    } )<DOT>{
+    //!Imprimir el valor de una variable o constante
+    //printCode(printValue(value));
+  })
+  }
+
+  void Assignment(boolean inicial) :
+  {String name ="", value = "";}
+  {
+    (name = Variable(inicial)
+    <SET>
+    value = Expression(inicial, false)
+    <DOT>){
+        if(!inicial){
+          if(!exist(name)){
+            System.out.println("Error, la id no está declarada: " + name);
+            return;
+          }
+
+          printCode(opVar(name, value));
+      }
+    }
+  }
+
+  void Conditional(boolean inicial) :
+  {String label = "", id = ""; String[] info = {};}
+  {
+    <IF>{
+      if(!inicial)
+        label = generateLabel();
+    }
+    id = Expression(inicial, true)
+    info = Condition(inicial, true)
+    <DOT><DOT>{
+      if(!inicial)
+        printCode(generateIf(id, info, label));
+      else{
+        //! /////////////////// if con múltiples operaciones
+      }
+    }
+    Statements(inicial)
+    <DOT><DOT>{
+      printCode(label+":\n");
+    }
+  }
+
+  String[] Condition(boolean inicial, boolean isDeclaration) :
+  {String id = "", valueC = "";}
+  {
+    (valueC = CompareOp(inicial)
+    id = Expression(inicial, isDeclaration)){
+      return (new String[]{valueC, id});
+    }
+  }
+
+  String CompareOp(boolean inicial) :
+  {}
+  {
+    (<EQ>
+    | <NEQ>
+    | <BEQ>
+    | <GEQ>
+    | <BE>
+    | <GE>
+    | <AND>
+    | <OR>){
+      return token.image;
+    }
+  }
+
+  void Loop(boolean inicial) :
+  {String id = "", value = "", type = "", limit = "", label = "";}
+  {
+    <REPEAT>{
+      if(!inicial){
+        label = generateLabel();
+        printCode(label+":\n");
+      }
+    }(<IF>
+    Expression(inicial, true)
+    Condition(inicial, true)
+    <DOT><DOT>
+    Statements(inicial)
+    <DOT><DOT>
+    |
+    <INT>{
+      type = token.image;
+    } <IDENTIFIER>{
+      id = token.image;
+    } <SET> <INTEGER>{
+      value = token.image;
+      if(inicial){
+        insertId(id, type, value);
+      }
+    } <TO> <INTEGER>{
+      limit = token.image;
+    } <DOT> <DOT> 
+    Statements(inicial) 
+    <DOT> <DOT>{
+      //establecemos la repetición condicional
+      if(!inicial)
+        printCode(generateLoop(label, id, limit, "be"));
+    })
+  }

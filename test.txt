@@ -1,0 +1,10 @@
+start
+
+int a set 100.
+int b set 10.5.
+
+int res set a add b.
+
+show.res.
+
+end .. printDec

@@ -1,0 +1,19 @@
+jmp start
+var dw 10
+var2 dw 20
+var3 dw 30
+res dw 0
+start:
+
+mov ax, 10
+add ax, var3
+mov res, ax
+mov ax, res
+add ax, var3
+mov res, ax
+mov ax, res
+add ax, var2
+mov res, ax
+mov ax, res
+add ax, var
+mov res, ax

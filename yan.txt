@@ -1,0 +1,33 @@
+start
+
+comment
+This is Yaniz Code
+fin
+
+int var set 10.
+int var2 set 8.
+int res.
+int val.
+word msg1 set ,Este es un mensajeee,.
+
+showW.msg1.
+showW.,este es otro mensaje,.
+
+res set var sub var2.
+show.res.
+
+showW.,Calculo de operaciones,.
+val set 200 div var.
+show.val.
+val set 400 mod 2.
+show.val.
+
+res set var mul var2.
+show.res.
+
+repeat int i set 0 to 50..
+ i set i sub 1.
+ showW.,Dentro de ciclo,.
+..
+
+end..printDec

@@ -1,0 +1,90 @@
+lo que está entre '*' son palabras reservadas:
+
+Tipos de datos existentes:
+*int*, *word*, *byte*, *decimal*, *array*
+
+Tokens para comparar:
+//==, !=, <=, >=, <, >
+*eq*, *neq*, *beq*, *geq*, *be*, *ge*
+
+Tokens de operaciones:
+//+, -, *, /, %
+*add*, *sub*, *mul*, *div*, *mod*
+
+
+Comentarios:
+*comment* 
+comentario
+de
+lineas
+*end*
+
+*comment* comentario una linea
+
+-----
+
+Ejemplos de declaraciones:
+
+*int* va1 *set* 10.
+*word* palabra *set* "Hola".
+*byte* byte_ejemplo *set* 'c'.
+*byte* byte_dos *set* 0.
+*decimal* decim *set* 10.5.
+*int* *to* *array* arreglo *set* *1, 2, 3, 4*.
+
+otro ejemplo de declaracines de el arreglo:
+*int* val.
+val *set* 10.
+*word* palabra.
+*int* *to* *array* arreglo2 *size* 3.
+
+----
+
+Ejemplo de condicionales:
+
+*int* var *set* 10.
+*if* var *eq* 10..
+ var *set* 20.
+.. 
+
+*if* var *geq* 20..
+ *int* valor *set* 25.
+ var *set* 30.
+*else*
+ var *set* 40.
+..
+ 
+
+----
+
+Ejemplos de ciclos:
+
+*int* num *set* 5.
+*repeat* *int* var *set* 1 *to* 10..
+ num *set* num *add* var.
+..
+
+*repear* *if* num *neq* 500..
+ num *set* num *add* 10.
+..
+
+------
+
+Ejemplo de pequeño programa:
+
+*start*
+
+*int* var *set* 10.
+*int* num *set* 50.
+*decimal* res *set* var *add* num.
+
+*int* control *set* 0.
+
+*repeat* *if* res *ge* 0..
+ *if* res *mod* 2 *eq* 0..
+  control *set* control *add* 1.
+ ..
+..
+
+
+*end*
